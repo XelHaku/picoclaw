@@ -200,11 +200,19 @@ type WhatsAppConfig struct {
 	AllowFrom FlexibleStringSlice `json:"allow_from" env:"PICOCLAW_CHANNELS_WHATSAPP_ALLOW_FROM"`
 }
 
+type TelegramAccountConfig struct {
+	ID        string              `json:"id"`
+	Token     string              `json:"token"`
+	Proxy     string              `json:"proxy,omitempty"`
+	AllowFrom FlexibleStringSlice `json:"allow_from,omitempty"`
+}
+
 type TelegramConfig struct {
-	Enabled   bool                `json:"enabled"    env:"PICOCLAW_CHANNELS_TELEGRAM_ENABLED"`
-	Token     string              `json:"token"      env:"PICOCLAW_CHANNELS_TELEGRAM_TOKEN"`
-	Proxy     string              `json:"proxy"      env:"PICOCLAW_CHANNELS_TELEGRAM_PROXY"`
-	AllowFrom FlexibleStringSlice `json:"allow_from" env:"PICOCLAW_CHANNELS_TELEGRAM_ALLOW_FROM"`
+	Enabled   bool                    `json:"enabled"    env:"PICOCLAW_CHANNELS_TELEGRAM_ENABLED"`
+	Token     string                  `json:"token"      env:"PICOCLAW_CHANNELS_TELEGRAM_TOKEN"`
+	Proxy     string                  `json:"proxy"      env:"PICOCLAW_CHANNELS_TELEGRAM_PROXY"`
+	AllowFrom FlexibleStringSlice     `json:"allow_from" env:"PICOCLAW_CHANNELS_TELEGRAM_ALLOW_FROM"`
+	Accounts  []TelegramAccountConfig `json:"accounts,omitempty"`
 }
 
 type FeishuConfig struct {

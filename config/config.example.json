@@ -48,10 +48,24 @@
   "channels": {
     "telegram": {
       "enabled": false,
+      "_comment_single": "Single bot: set token directly (legacy, still supported)",
       "token": "YOUR_TELEGRAM_BOT_TOKEN",
       "proxy": "",
       "allow_from": [
         "YOUR_USER_ID"
+      ],
+      "_comment_multi": "Multi-bot: use accounts[] instead of token (accounts takes precedence)",
+      "accounts": [
+        {
+          "id": "link",
+          "token": "BOT_TOKEN_1",
+          "allow_from": ["YOUR_USER_ID"]
+        },
+        {
+          "id": "yunobo",
+          "token": "BOT_TOKEN_2",
+          "allow_from": ["YOUR_USER_ID"]
+        }
       ]
     },
     "discord": {

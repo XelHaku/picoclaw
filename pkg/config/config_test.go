@@ -377,6 +377,105 @@ func TestLoadConfig_OpenAIWebSearchDefaultsTrueWhenUnset(t *testing.T) {
 	}
 }
 
+func TestTelegramConfig_AccountsParsing(t *testing.T) {
+	jsonData := `{
+		"channels": {
+			"telegram": {
+				"enabled": true,
+				"accounts": [
+					{
+						"id": "link",
+						"token": "TOKEN_1",
+						"allow_from": ["6586915095"],
+						"proxy": "http://proxy:8080"
+					},
+					{
+						"id": "yunobo",
+						"token": "TOKEN_2"
+					}
+				]
+			}
+		}
+	}`
+
+	cfg := DefaultConfig()
+	if err := json.Unmarshal([]byte(jsonData), cfg); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+
+	if len(cfg.Channels.Telegram.Accounts) != 2 {
+		t.Fatalf("accounts len = %d, want 2", len(cfg.Channels.Telegram.Accounts))
+	}
+
+	link := cfg.Channels.Telegram.Accounts[0]
+	if link.ID != "link" || link.Token != "TOKEN_1" || link.Proxy != "http://proxy:8080" {
+		t.Errorf("link account = %+v", link)
+	}
+	if len(link.AllowFrom) != 1 || link.AllowFrom[0] != "6586915095" {
+		t.Errorf("link.AllowFrom = %v", link.AllowFrom)
+	}
+
+	yunobo := cfg.Channels.Telegram.Accounts[1]
+	if yunobo.ID != "yunobo" || yunobo.Token != "TOKEN_2" {
+		t.Errorf("yunobo account = %+v", yunobo)
+	}
+	if len(yunobo.AllowFrom) != 0 {
+		t.Errorf("yunobo.AllowFrom should be empty, got %v", yunobo.AllowFrom)
+	}
+}
+
+func TestTelegramConfig_LegacyTokenStillWorks(t *testing.T) {
+	jsonData := `{
+		"channels": {
+			"telegram": {
+				"enabled": true,
+				"token": "LEGACY_TOKEN",
+				"proxy": "http://proxy:8080",
+				"allow_from": ["123456"]
+			}
+		}
+	}`
+
+	cfg := DefaultConfig()
+	if err := json.Unmarshal([]byte(jsonData), cfg); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+
+	if cfg.Channels.Telegram.Token != "LEGACY_TOKEN" {
+		t.Errorf("Token = %q, want LEGACY_TOKEN", cfg.Channels.Telegram.Token)
+	}
+	if len(cfg.Channels.Telegram.Accounts) != 0 {
+		t.Errorf("Accounts should be empty for legacy config, got %d", len(cfg.Channels.Telegram.Accounts))
+	}
+}
+
+func TestTelegramConfig_AccountsPrecedenceOverLegacy(t *testing.T) {
+	jsonData := `{
+		"channels": {
+			"telegram": {
+				"enabled": true,
+				"token": "LEGACY_TOKEN",
+				"accounts": [
+					{"id": "bot1", "token": "TOKEN_1"}
+				]
+			}
+		}
+	}`
+
+	cfg := DefaultConfig()
+	if err := json.Unmarshal([]byte(jsonData), cfg); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+
+	// Both fields are present; channel code will prefer accounts[] over legacy token
+	if len(cfg.Channels.Telegram.Accounts) != 1 {
+		t.Fatalf("accounts len = %d, want 1", len(cfg.Channels.Telegram.Accounts))
+	}
+	if cfg.Channels.Telegram.Accounts[0].ID != "bot1" {
+		t.Errorf("account[0].ID = %q", cfg.Channels.Telegram.Accounts[0].ID)
+	}
+}
+
 func TestLoadConfig_OpenAIWebSearchCanBeDisabled(t *testing.T) {
 	dir := t.TempDir()
 	configPath := filepath.Join(dir, "config.json")

@@ -44,3 +44,7 @@ tasks/
 
 # Added by goreleaser init:
 dist/
+.claude/agents/consensus/byzantine-coordinator.md
+.claude/
+.claude-flow/
+.omc/
